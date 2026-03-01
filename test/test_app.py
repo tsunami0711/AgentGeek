@@ -91,7 +91,7 @@ class TestChatEndpoint(unittest.TestCase):
         self.assertEqual(data["response"], "你好，有什么可以帮您？")
         self.assertEqual(data["status"], "success")
         self.assertIsInstance(data["tool_results"], list)
-        mock_chat.assert_called_once_with("s1", "你好")
+        mock_chat.assert_called_once_with("s1", "你好", model_ip=None)
 
     @patch("app.chat")
     def test_auto_generate_session_id(self, mock_chat):
@@ -212,6 +212,121 @@ class TestChatEndpoint(unittest.TestCase):
         self.assertIsInstance(data["duration_ms"], int)
         self.assertEqual(data["tool_results"], [])
         self.assertEqual(data["response"], "")
+
+
+class TestChatV1Endpoint(unittest.TestCase):
+    """POST /api/v1/chat 接口测试（自部署模型）"""
+
+    def setUp(self):
+        app.config["TESTING"] = True
+        self.client = app.test_client()
+
+    # --------------------------------------------------
+    # 参数校验
+    # --------------------------------------------------
+
+    def test_non_json_body_returns_400(self):
+        """请求体不是 JSON 时应返回 400"""
+        resp = self.client.post(
+            "/api/v1/chat",
+            data="not json",
+            content_type="text/plain",
+        )
+        self.assertEqual(resp.status_code, 400)
+
+    def test_missing_model_ip_returns_400(self):
+        """缺少 model_ip 字段时应返回 400"""
+        resp = self.client.post(
+            "/api/v1/chat",
+            json={"session_id": "test", "message": "你好"},
+        )
+        self.assertEqual(resp.status_code, 400)
+        data = resp.get_json()
+        self.assertIn("model_ip", data["error"])
+
+    def test_empty_model_ip_returns_400(self):
+        """model_ip 为空字符串时应返回 400"""
+        resp = self.client.post(
+            "/api/v1/chat",
+            json={"session_id": "test", "message": "你好", "model_ip": ""},
+        )
+        self.assertEqual(resp.status_code, 400)
+        data = resp.get_json()
+        self.assertIn("model_ip", data["error"])
+
+    def test_missing_message_returns_400(self):
+        """缺少 message 时应返回 400"""
+        resp = self.client.post(
+            "/api/v1/chat",
+            json={"model_ip": "192.168.1.100:8000"},
+        )
+        self.assertEqual(resp.status_code, 400)
+
+    # --------------------------------------------------
+    # 正常请求
+    # --------------------------------------------------
+
+    @patch("app.chat")
+    def test_normal_request_returns_200(self, mock_chat):
+        """v1 正常请求应返回 200 且透传 model_ip"""
+        mock_chat.return_value = {
+            "response": "你好，有什么可以帮您？",
+            "status": "success",
+            "tool_results": [],
+        }
+        resp = self.client.post(
+            "/api/v1/chat",
+            json={
+                "session_id": "v1_s1",
+                "message": "你好",
+                "model_ip": "192.168.1.100:8000",
+            },
+        )
+        self.assertEqual(resp.status_code, 200)
+        data = resp.get_json()
+        self.assertEqual(data["session_id"], "v1_s1")
+        self.assertEqual(data["response"], "你好，有什么可以帮您？")
+        # 验证 chat 被调用时传入了 model_ip
+        mock_chat.assert_called_once_with(
+            "v1_s1", "你好", model_ip="192.168.1.100:8000"
+        )
+
+    @patch("app.chat")
+    def test_response_json_structure(self, mock_chat):
+        """v1 响应体应包含所有必需字段"""
+        mock_chat.return_value = {
+            "response": "ok",
+            "status": "success",
+            "tool_results": [],
+        }
+        resp = self.client.post(
+            "/api/v1/chat",
+            json={
+                "session_id": "v1_struct",
+                "message": "测试",
+                "model_ip": "10.0.0.1:8000",
+            },
+        )
+        data = resp.get_json()
+        for field in ("session_id", "response", "status", "tool_results", "timestamp", "duration_ms"):
+            self.assertIn(field, data)
+
+    @patch("app.chat")
+    def test_internal_error_returns_500(self, mock_chat):
+        """v1 agent.chat 抛异常时应返回 500"""
+        mock_chat.side_effect = RuntimeError("模型连接失败")
+        resp = self.client.post(
+            "/api/v1/chat",
+            json={
+                "session_id": "v1_err",
+                "message": "你好",
+                "model_ip": "10.0.0.1:8000",
+            },
+        )
+        self.assertEqual(resp.status_code, 500)
+        data = resp.get_json()
+        self.assertEqual(data["status"], "error")
+        self.assertIn("模型连接失败", data["error"])
 
 
 if __name__ == "__main__":

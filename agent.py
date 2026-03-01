@@ -85,31 +85,41 @@ def _now_timestamp() -> str:
 # ============================================================
 
 
-def _call_llm(messages: list, tools: list = None) -> dict:
+def _call_llm(messages: list, tools: list = None, model_ip: str = None) -> dict:
     """
     调用 OpenAI 兼容的 Chat Completion API。
+
+    当 model_ip 为 None 时，使用 config 中配置的远程 LLM（需要 API Key 和模型名）。
+    当 model_ip 不为 None 时，调用用户自部署的模型（不需要 API Key 和模型名）。
 
     Args:
         messages: OpenAI 格式的消息列表
         tools: 工具定义列表（可选）
+        model_ip: 自部署模型的 IP 地址（可选，如 "192.168.1.100:8000"）
 
     Returns:
         API 响应的 JSON 字典
     """
-    url = config.LLM_API_BASE.rstrip("/") + "/chat/completions"
-    headers = {
-        "Content-Type": "application/json",
-        "Authorization": f"Bearer {config.LLM_API_KEY}",
-    }
+    if model_ip:
+        # 自部署模型：直接用 model_ip 构造 URL，无需 API Key 和模型名
+        url = model_ip
+        headers = {"Content-Type": "application/json"}
+        payload = {"model": config.LLM_MODEL, "messages": messages}
+        model_label = f"self-hosted@{model_ip}"
+    else:
+        # 远程 LLM：使用 config 中的配置
+        url = config.LLM_API_BASE.rstrip("/") + "/chat/completions"
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {config.LLM_API_KEY}",
+        }
+        payload = {"model": config.LLM_MODEL, "messages": messages}
+        model_label = config.LLM_MODEL
 
-    payload = {
-        "model": config.LLM_MODEL,
-        "messages": messages,
-    }
     if tools:
         payload["tools"] = tools
 
-    logger.info("调用LLM model=%s messages=%d条 tools=%d个", config.LLM_MODEL, len(messages), len(tools) if tools else 0)
+    logger.info("调用LLM model=%s messages=%d条 tools=%d个", model_label, len(messages), len(tools) if tools else 0)
     logger.debug("LLM请求URL: %s", url)
 
     start_time = time.time()
@@ -144,7 +154,7 @@ def _call_llm(messages: list, tools: list = None) -> dict:
 # ============================================================
 
 
-def chat(session_id: str, user_message: str) -> dict:
+def chat(session_id: str, user_message: str, model_ip: str = None) -> dict:
     """
     处理一次用户消息，返回包含 Agent 回复及工具调用详情的字典。
 
@@ -158,6 +168,7 @@ def chat(session_id: str, user_message: str) -> dict:
     Args:
         session_id: 会话 ID
         user_message: 用户消息文本
+        model_ip: 自部署模型的 IP 地址（可选，v1 接口使用）
 
     Returns:
         dict: {
@@ -191,7 +202,7 @@ def chat(session_id: str, user_message: str) -> dict:
     for round_idx in range(config.MAX_TOOL_ROUNDS):
         logger.info("会话 [%s] Agent循环 第%d轮", session_id, round_idx + 1)
 
-        response = _call_llm(llm_messages, tools=TOOLS)
+        response = _call_llm(llm_messages, tools=TOOLS, model_ip=model_ip)
 
         choice = response["choices"][0]
         message = choice["message"]

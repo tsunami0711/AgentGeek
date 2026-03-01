@@ -44,13 +44,28 @@ python app.py
 
 ### 4. 调试
 
+服务提供两个接口：
+
+- **`/api/v1/chat`** — 使用自部署模型（需要传 `model_ip`，不需要 API Key）
+- **`/api/v2/chat`** — 使用远程 LLM（通过 config 中配置的 API Key 和模型名）
+
+**v2 接口（远程 LLM）：**
+
 ```bash
 curl -X POST http://localhost:5000/api/v2/chat ^
   -H "Content-Type: application/json" ^
   -d "{\"session_id\":\"test1\",\"message\":\"帮我找西二旗附近3000以下的一居室\"}"
 ```
 
-响应示例：
+**v1 接口（自部署模型）：**
+
+```bash
+curl -X POST http://localhost:5000/api/v1/chat ^
+  -H "Content-Type: application/json" ^
+  -d "{\"session_id\":\"test1\",\"model_ip\":\"192.168.1.100:8000\",\"message\":\"帮我找西二旗附近3000以下的一居室\"}"
+```
+
+响应示例（两个接口格式一致）：
 
 ```json
 {
@@ -79,14 +94,14 @@ python -m pytest test/ -v
 
 ```
 AgentGeek/
-├── app.py                   # HTTP 服务入口（Flask，POST /api/v2/chat）
+├── app.py                   # HTTP 服务入口（Flask，POST /api/v1/chat + /api/v2/chat）
 ├── agent.py                 # Agent 核心（对话管理、LLM 调用、工具调用循环）
 ├── tools.py                 # 工具定义（OpenAI function 格式）+ 工具执行引擎
 ├── config.py                # 配置管理 + 日志初始化
 ├── requirements.txt         # 外部依赖（flask、requests）
 ├── conversations/           # 对话历史存储（JSON 文件，按 session_id 隔离）
 ├── logs/                    # 运行日志（agent.log）
-├── test/                    # 单元测试（51 个用例）
+├── test/                    # 单元测试（60 个用例）
 │   ├── test_app.py          # HTTP 接口测试
 │   ├── test_agent.py        # Agent 逻辑测试
 │   └── test_tools.py        # 工具定义与执行测试
@@ -101,7 +116,7 @@ AgentGeek/
 - **语言**：Python 3
 - **Web 框架**：Flask
 - **HTTP 客户端**：Requests
-- **LLM 接口**：OpenAI API 兼容格式（支持 SiliconFlow、DashScope、OpenAI 等）
+- **LLM 接口**：OpenAI API 兼容格式（支持 SiliconFlow、DashScope、OpenAI 及自部署模型）
 - **数据存储**：JSON 文件（对话历史）
 - **日志**：Python logging（控制台 + 文件双输出）
 - **测试**：unittest + unittest.mock

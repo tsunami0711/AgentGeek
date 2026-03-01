@@ -1,6 +1,6 @@
 """
 租房Agent HTTP 服务入口
-提供 POST /api/v2/chat 接口，通过 curl 调试。
+提供 POST /api/v1/chat（自部署模型）和 POST /api/v2/chat（远程LLM）两个接口。
 """
 
 import logging
@@ -20,31 +20,13 @@ logger = logging.getLogger(__name__)
 app = Flask(__name__)
 
 
-@app.route("/api/v2/chat", methods=["POST"])
-def chat_endpoint():
+def _handle_chat(endpoint_name: str, model_ip: str = None):
     """
-    问答接口
+    公共的聊天处理逻辑，供 /api/v1/chat 和 /api/v2/chat 共用。
 
-    请求体 (JSON):
-        {
-            "session_id": "abc123",   // 可选，不传则自动生成
-            "message": "帮我找西二旗附近的两居室"  // 必填
-        }
-
-    响应体 (JSON):
-        {
-            "session_id": "abc123",
-            "response": "好的，我来帮您查找...",
-            "status": "success",
-            "tool_results": [...],
-            "timestamp": 1709251200,
-            "duration_ms": 1234
-        }
-
-    curl 调试示例:
-        curl -X POST http://localhost:5000/api/v2/chat \
-            -H "Content-Type: application/json" \
-            -d "{\"session_id\":\"test1\",\"message\":\"帮我找西二旗附近3000以下的一居室\"}"
+    Args:
+        endpoint_name: 端点名称（用于日志）
+        model_ip: 自部署模型的 IP 地址（v1 接口传入，v2 为 None）
     """
     start_time = time.time()
 
@@ -62,10 +44,10 @@ def chat_endpoint():
     if not session_id:
         session_id = uuid.uuid4().hex
 
-    logger.info(">>> 请求 POST /api/v2/chat session=%s message=%s", session_id, message[:80])
+    logger.info(">>> 请求 POST %s session=%s message=%s", endpoint_name, session_id, message[:80])
 
     try:
-        result = chat(session_id, message)
+        result = chat(session_id, message, model_ip=model_ip)
         elapsed = time.time() - start_time
         duration_ms = int(elapsed * 1000)
 
@@ -101,6 +83,53 @@ def chat_endpoint():
             "duration_ms": duration_ms,
             "error": f"处理失败: {str(e)}",
         }), 500
+
+
+@app.route("/api/v1/chat", methods=["POST"])
+def chat_v1_endpoint():
+    """
+    问答接口（v1 - 自部署模型）
+
+    请求体 (JSON):
+        {
+            "session_id": "abc123",   // 可选，不传则自动生成
+            "message": "帮我找西二旗附近的两居室",  // 必填
+            "model_ip": "192.168.1.100:8000"        // 必填，自部署模型地址
+        }
+
+    curl 调试示例:
+        curl -X POST http://localhost:5000/api/v1/chat \
+            -H "Content-Type: application/json" \
+            -d "{\"session_id\":\"test1\",\"model_ip\":\"192.168.1.100:8000\",\"message\":\"帮我找西二旗附近3000以下的一居室\"}"
+    """
+    data = request.get_json(silent=True)
+    if not data:
+        return jsonify({"error": "请求体必须为 JSON 格式"}), 400
+
+    model_ip = data.get("model_ip", "").strip()
+    if not model_ip:
+        return jsonify({"error": "model_ip 字段不能为空"}), 400
+
+    return _handle_chat("/api/v1/chat", model_ip=model_ip)
+
+
+@app.route("/api/v2/chat", methods=["POST"])
+def chat_v2_endpoint():
+    """
+    问答接口（v2 - 远程LLM）
+
+    请求体 (JSON):
+        {
+            "session_id": "abc123",   // 可选，不传则自动生成
+            "message": "帮我找西二旗附近的两居室"  // 必填
+        }
+
+    curl 调试示例:
+        curl -X POST http://localhost:5000/api/v2/chat \
+            -H "Content-Type: application/json" \
+            -d "{\"session_id\":\"test1\",\"message\":\"帮我找西二旗附近3000以下的一居室\"}"
+    """
+    return _handle_chat("/api/v2/chat")
 
 
 if __name__ == "__main__":

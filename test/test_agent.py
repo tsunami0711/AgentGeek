@@ -312,5 +312,39 @@ class TestChatLoop(unittest.TestCase):
         self.assertEqual(second_call_messages[3]["content"], "msg2")
 
 
+class TestModelIp(unittest.TestCase):
+    """model_ip 参数透传测试"""
+
+    def setUp(self):
+        self.tmp_dir = tempfile.mkdtemp()
+        self._original_dir = config.CONVERSATIONS_DIR
+        config.CONVERSATIONS_DIR = self.tmp_dir
+
+    def tearDown(self):
+        config.CONVERSATIONS_DIR = self._original_dir
+        shutil.rmtree(self.tmp_dir, ignore_errors=True)
+
+    @patch("agent._call_llm")
+    def test_model_ip_passed_to_call_llm(self, mock_llm):
+        """chat(model_ip=...) 应将 model_ip 透传给 _call_llm"""
+        mock_llm.return_value = {
+            "choices": [{"message": {"role": "assistant", "content": "ok"}}]
+        }
+        agent.chat("test_ip", "你好", model_ip="192.168.1.100:8000")
+        # 验证 _call_llm 被调用时 model_ip 参数正确传入
+        _, kwargs = mock_llm.call_args
+        self.assertEqual(kwargs["model_ip"], "192.168.1.100:8000")
+
+    @patch("agent._call_llm")
+    def test_no_model_ip_defaults_to_none(self, mock_llm):
+        """不传 model_ip 时，_call_llm 的 model_ip 应为 None"""
+        mock_llm.return_value = {
+            "choices": [{"message": {"role": "assistant", "content": "ok"}}]
+        }
+        agent.chat("test_no_ip", "你好")
+        _, kwargs = mock_llm.call_args
+        self.assertIsNone(kwargs["model_ip"])
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -9,13 +9,14 @@
 ```
 ┌──────────────────────────────────────────────────┐
 │                   客户端 (curl)                    │
-│              POST /api/v2/chat {session_id, message}     │
+│  POST /api/v1/chat {session_id, message, model_ip}│
+│  POST /api/v2/chat {session_id, message}          │
 └──────────────────────┬───────────────────────────┘
                        │
 ┌──────────────────────▼───────────────────────────┐
 │                 app.py (HTTP 层)                  │
-│  · Flask 路由                                     │
-│  · 参数校验 (JSON格式、message非空)               │
+│  · Flask 路由 (v1: 自部署模型, v2: 远程LLM)      │
+│  · 参数校验 (JSON格式、message非空、v1需model_ip) │
 │  · session_id 自动生成                            │
 │  · 请求/响应日志                                  │
 │  · 异常捕获 → 500                                 │
@@ -25,7 +26,7 @@
 │                agent.py (Agent 核心层)             │
 │  · 对话存储 (load/save JSON文件)                  │
 │  · 消息格式转换 (存储格式 ↔ OpenAI格式)           │
-│  · LLM 调用 (OpenAI Chat Completion API)          │
+│  · LLM 调用 (远程API 或 自部署模型，由model_ip决定)│
 │  · Agent 循环 (文本回复 / tool_calls → 执行 → 回传)│
 └──────────────────────┬───────────────────────────┘
                        │
@@ -39,11 +40,11 @@
                        │
           ┌────────────┴────────────┐
           ▼                         ▼
-   ┌─────────────┐          ┌─────────────┐
-   │  LLM API    │          │  租房仿真API │
-   │ (SiliconFlow │          │ (8080端口)  │
-   │  /OpenAI等)  │          │             │
-   └─────────────┘          └─────────────┘
+   ┌─────────────┐  ┌──────────────┐  ┌─────────────┐
+   │  远程LLM    │  │ 自部署模型   │  │  租房仿真API │
+   │ (SiliconFlow │  │ (model_ip)  │  │ (8080端口)  │
+   │  /OpenAI等)  │  │ 无需API Key │  │             │
+   └─────────────┘  └──────────────┘  └─────────────┘
 ```
 
 ### 1.2 请求处理流程
@@ -205,17 +206,20 @@ app.py    (入口)
 
 #### 2.3.3 LLM 调用
 
-`_call_llm(messages, tools)` 函数：
+`_call_llm(messages, tools, model_ip=None)` 函数支持两种模式：
 
-- 构造 OpenAI Chat Completion 请求：URL = `LLM_API_BASE` + `/chat/completions`
-- 请求头包含 `Authorization: Bearer {API_KEY}`
-- payload 包含 `model`、`messages`、`tools`（可选）
+| 模式 | 条件 | URL | 请求头 | payload |
+|------|------|-----|--------|---------|
+| 远程 LLM | `model_ip` 为 None | `LLM_API_BASE/chat/completions` | `Authorization: Bearer {API_KEY}` | 含 `model`、`messages`、`tools` |
+| 自部署模型 | `model_ip` 不为 None | `http://{model_ip}/v1/chat/completions` | 仅 `Content-Type` | 含 `messages`、`tools`（无需 `model` 和 API Key） |
+
+- 自动为 `model_ip` 补充 `http://` 前缀（如未携带）
 - 记录耗时和 token 用量
 - 非 200 响应时抛出 `RuntimeError` 并携带完整错误信息
 
 #### 2.3.4 Agent 循环
 
-`chat(session_id, user_message)` 是对外唯一入口，流程：
+`chat(session_id, user_message, model_ip=None)` 是对外唯一入口，流程：
 
 1. 加载历史对话，初始化 `all_tool_results` 收集列表
 2. 追加用户新消息（含时间戳）
@@ -246,12 +250,20 @@ app.py    (入口)
 
 ### 2.4 app.py — HTTP 服务入口
 
-**职责**：Flask 路由、参数校验、异常处理。
+**职责**：Flask 路由、参数校验、异常处理。提供两个版本的接口，共用 `_handle_chat()` 公共处理逻辑。
 
-**端点 `POST /api/v2/chat`**：
+#### 端点 `POST /api/v1/chat`（自部署模型）
+
+- 请求体：`{"session_id": "可选", "message": "必填", "model_ip": "必填"}`
+- `model_ip` 为自部署模型的 IP 地址（如 `192.168.1.100:8000`），调用时不需要 API Key 和模型名
+- 校验：`model_ip` 缺失或为空时返回 400
+
+#### 端点 `POST /api/v2/chat`（远程 LLM）
 
 - 请求体：`{"session_id": "可选", "message": "必填"}`
-- 成功响应体 (200)：
+- 使用 `config.py` 中配置的 `LLM_API_BASE`、`LLM_API_KEY`、`LLM_MODEL`
+
+#### 响应格式（两个接口一致）
 
 ```json
 {
@@ -275,12 +287,13 @@ app.py    (入口)
 | `timestamp` | int | 响应时间戳（Unix 秒） |
 | `duration_ms` | int | 处理耗时（毫秒） |
 
-**校验规则**：
+#### 校验规则
 
 | 场景 | 状态码 | 说明 |
 |------|--------|------|
 | 请求体不是 JSON | 400 | 返回 `{"error": "请求体必须为 JSON 格式"}` |
 | message 缺失或为空 | 400 | 返回 `{"error": "message 字段不能为空"}` |
+| v1 接口 model_ip 缺失 | 400 | 返回 `{"error": "model_ip 字段不能为空"}` |
 | session_id 未传 | 200 | 自动生成 UUID |
 | Agent 内部异常 | 500 | 返回统一结构，`status` 为 `"error"`，额外包含 `error` 字段 |
 
@@ -383,16 +396,16 @@ AgentGeek/
 
 | 测试文件 | 测试类数 | 用例数 | 测试对象 |
 |----------|----------|--------|----------|
-| test/test_app.py | 1 | 11 | HTTP 接口 |
-| test/test_agent.py | 4 | 18 | Agent 核心逻辑 |
+| test/test_app.py | 2 | 18 | HTTP 接口（v1 + v2） |
+| test/test_agent.py | 5 | 20 | Agent 核心逻辑 + model_ip 透传 |
 | test/test_tools.py | 3 | 22 | 工具定义与执行 |
-| **合计** | **8** | **51** | |
+| **合计** | **10** | **60** | |
 
 所有外部依赖（LLM API、租房仿真 API）均通过 `unittest.mock` 模拟，测试无需网络连接。
 
 ### 4.2 test/test_app.py — HTTP 接口测试
 
-**TestChatEndpoint** (11 个用例)：
+**TestChatEndpoint**（v2 接口，11 个用例）：
 
 | 用例 | 验证内容 |
 |------|----------|
@@ -400,13 +413,25 @@ AgentGeek/
 | `test_empty_message_returns_400` | message 为空字符串返回 400 |
 | `test_missing_message_returns_400` | 缺少 message 字段返回 400 |
 | `test_whitespace_only_message_returns_400` | message 仅含空格返回 400 |
-| `test_normal_request_returns_200` | 正常请求返回 200，response/status/tool_results 正确 |
+| `test_normal_request_returns_200` | 正常请求返回 200，response/status/tool_results 正确，chat 以 model_ip=None 调用 |
 | `test_auto_generate_session_id` | 不传 session_id 时自动生成 UUID |
-| `test_response_json_structure` | 响应包含全部 6 个必需字段（session_id/response/status/tool_results/timestamp/duration_ms） |
+| `test_response_json_structure` | 响应包含全部 6 个必需字段 |
 | `test_timestamp_is_int` | timestamp 为 int 类型且在合理范围内 |
 | `test_duration_ms_is_int` | duration_ms 为 int 类型且非负 |
 | `test_tool_results_in_response` | tool_results 包含 {name, success, output} 格式的工具调用结果 |
 | `test_internal_error_returns_500` | Agent 异常返回 500，响应体包含统一结构（status="error"） |
+
+**TestChatV1Endpoint**（v1 接口 - 自部署模型，7 个用例）：
+
+| 用例 | 验证内容 |
+|------|----------|
+| `test_non_json_body_returns_400` | 非 JSON 请求体返回 400 |
+| `test_missing_model_ip_returns_400` | 缺少 model_ip 字段返回 400 |
+| `test_empty_model_ip_returns_400` | model_ip 为空字符串返回 400 |
+| `test_missing_message_returns_400` | 缺少 message 字段返回 400 |
+| `test_normal_request_returns_200` | 正常请求返回 200，验证 chat 被调用时传入了 model_ip 参数 |
+| `test_response_json_structure` | 响应包含全部 6 个必需字段 |
+| `test_internal_error_returns_500` | Agent 异常返回 500 |
 
 ### 4.3 test/test_agent.py — Agent 逻辑测试
 
@@ -447,6 +472,13 @@ AgentGeek/
 | `test_tool_call_then_reply` | LLM 先 tool_call 再文本回复，tool_results 包含 {name, success, output} |
 | `test_max_rounds_fallback` | 超过最大轮次返回 fallback 提示，status=max_rounds_exceeded，tool_results 数量正确 |
 | `test_context_continuity` | 同一 session 第二次请求包含历史上下文 |
+
+**TestModelIp** (2 个用例)：
+
+| 用例 | 验证内容 |
+|------|----------|
+| `test_model_ip_passed_to_call_llm` | chat(model_ip=...) 正确将 model_ip 透传给 _call_llm |
+| `test_no_model_ip_defaults_to_none` | 不传 model_ip 时 _call_llm 收到 model_ip=None |
 
 ### 4.4 test/test_tools.py — 工具定义与执行测试
 

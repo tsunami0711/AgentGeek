@@ -317,3 +317,96 @@
 [2026-03-02 00:57:14] INFO [werkzeug]  * Detected change in 'D:\\gitRepos\\AgentGeek\\app.py', reloading
 [2026-03-02 00:57:14] INFO [werkzeug]  * Detected change in 'D:\\gitRepos\\AgentGeek\\app.py', reloading
 [2026-03-02 00:57:14] INFO [werkzeug]  * Detected change in 'D:\\gitRepos\\AgentGeek\\test\\test_app.py', reloading
+[2026-03-02 00:57:15] INFO [__main__] 租房Agent服务启动 host=0.0.0.0 port=5000
+[2026-03-02 00:57:15] WARNING [werkzeug]  * Debugger is active!
+[2026-03-02 00:57:15] INFO [werkzeug]  * Debugger PIN: 366-885-201
+[2026-03-02 01:03:09] INFO [werkzeug]  * Detected change in 'D:\\gitRepos\\AgentGeek\\agent.py', reloading
+[2026-03-02 01:03:09] INFO [werkzeug]  * Detected change in 'D:\\gitRepos\\AgentGeek\\agent.py', reloading
+[2026-03-02 01:03:10] INFO [__main__] 租房Agent服务启动 host=0.0.0.0 port=5000
+[2026-03-02 01:03:10] WARNING [werkzeug]  * Debugger is active!
+[2026-03-02 01:03:10] INFO [werkzeug]  * Debugger PIN: 366-885-201
+[2026-03-02 01:03:48] INFO [werkzeug]  * Detected change in 'D:\\gitRepos\\AgentGeek\\agent.py', reloading
+[2026-03-02 01:03:48] INFO [werkzeug]  * Detected change in 'D:\\gitRepos\\AgentGeek\\agent.py', reloading
+[2026-03-02 01:03:48] INFO [werkzeug]  * Detected change in 'D:\\gitRepos\\AgentGeek\\agent.py', reloading
+[2026-03-02 01:03:49] INFO [__main__] 租房Agent服务启动 host=0.0.0.0 port=5000
+[2026-03-02 01:03:49] WARNING [werkzeug]  * Debugger is active!
+[2026-03-02 01:03:49] INFO [werkzeug]  * Debugger PIN: 366-885-201
+[2026-03-02 01:04:11] INFO [werkzeug]  * Detected change in 'D:\\gitRepos\\AgentGeek\\agent.py', reloading
+[2026-03-02 01:04:11] INFO [werkzeug]  * Detected change in 'D:\\gitRepos\\AgentGeek\\agent.py', reloading
+[2026-03-02 01:04:12] INFO [__main__] 租房Agent服务启动 host=0.0.0.0 port=5000
+[2026-03-02 01:04:12] WARNING [werkzeug]  * Debugger is active!
+[2026-03-02 01:04:12] INFO [werkzeug]  * Debugger PIN: 366-885-201
+[2026-03-02 01:04:20] INFO [werkzeug]  * Detected change in 'D:\\gitRepos\\AgentGeek\\agent.py', reloading
+[2026-03-02 01:04:20] INFO [werkzeug]  * Detected change in 'D:\\gitRepos\\AgentGeek\\agent.py', reloading
+[2026-03-02 01:04:20] INFO [werkzeug]  * Detected change in 'D:\\gitRepos\\AgentGeek\\agent.py', reloading
+[2026-03-02 01:04:21] INFO [__main__] 租房Agent服务启动 host=0.0.0.0 port=5000
+[2026-03-02 01:04:21] WARNING [werkzeug]  * Debugger is active!
+[2026-03-02 01:04:21] INFO [werkzeug]  * Debugger PIN: 366-885-201
+[2026-03-02 01:05:23] INFO [werkzeug]  * Detected change in 'D:\\gitRepos\\AgentGeek\\agent.py', reloading
+[2026-03-02 01:05:23] INFO [werkzeug]  * Detected change in 'D:\\gitRepos\\AgentGeek\\agent.py', reloading
+[2026-03-02 01:05:24] INFO [__main__] 租房Agent服务启动 host=0.0.0.0 port=5000
+[2026-03-02 01:05:24] WARNING [werkzeug]  * Debugger is active!
+[2026-03-02 01:05:24] INFO [werkzeug]  * Debugger PIN: 366-885-201
+[2026-03-02 01:05:37] INFO [werkzeug]  * Detected change in 'D:\\gitRepos\\AgentGeek\\app.py', reloading
+[2026-03-02 01:05:37] INFO [werkzeug]  * Detected change in 'D:\\gitRepos\\AgentGeek\\app.py', reloading
+[2026-03-02 01:05:37] INFO [werkzeug]  * Detected change in 'D:\\gitRepos\\AgentGeek\\app.py', reloading
+[2026-03-02 01:05:37] INFO [__main__] 租房Agent服务启动 host=0.0.0.0 port=5000
+[2026-03-02 01:05:37] WARNING [werkzeug]  * Debugger is active!
+[2026-03-02 01:05:37] INFO [werkzeug]  * Debugger PIN: 366-885-201
+[2026-03-02 01:05:59] INFO [werkzeug]  * Detected change in 'D:\\gitRepos\\AgentGeek\\app.py', reloading
+[2026-03-02 01:05:59] INFO [werkzeug]  * Detected change in 'D:\\gitRepos\\AgentGeek\\app.py', reloading
+[2026-03-02 01:06:00] INFO [__main__] 租房Agent服务启动 host=0.0.0.0 port=5000
+[2026-03-02 01:06:00] WARNING [werkzeug]  * Debugger is active!
+[2026-03-02 01:06:00] INFO [werkzeug]  * Debugger PIN: 366-885-201
+[2026-03-02 01:06:18] INFO [werkzeug]  * Detected change in 'D:\\gitRepos\\AgentGeek\\test\\test_app.py', reloading
+[2026-03-02 01:06:18] INFO [werkzeug]  * Detected change in 'D:\\gitRepos\\AgentGeek\\test\\test_app.py', reloading
+[2026-03-02 01:06:18] INFO [werkzeug]  * Detected change in 'D:\\gitRepos\\AgentGeek\\test\\test_app.py', reloading
+[2026-03-02 01:06:18] INFO [__main__] 租房Agent服务启动 host=0.0.0.0 port=5000
+[2026-03-02 01:06:18] WARNING [werkzeug]  * Debugger is active!
+[2026-03-02 01:06:18] INFO [werkzeug]  * Debugger PIN: 366-885-201
+[2026-03-02 01:06:35] INFO [werkzeug]  * Detected change in 'D:\\gitRepos\\AgentGeek\\test\\test_app.py', reloading
+[2026-03-02 01:06:35] INFO [werkzeug]  * Detected change in 'D:\\gitRepos\\AgentGeek\\test\\test_app.py', reloading
+[2026-03-02 01:06:35] INFO [werkzeug]  * Detected change in 'D:\\gitRepos\\AgentGeek\\test\\test_app.py', reloading
+[2026-03-02 01:06:36] INFO [__main__] 租房Agent服务启动 host=0.0.0.0 port=5000
+[2026-03-02 01:06:36] WARNING [werkzeug]  * Debugger is active!
+[2026-03-02 01:06:36] INFO [werkzeug]  * Debugger PIN: 366-885-201
+[2026-03-02 01:06:55] INFO [werkzeug]  * Detected change in 'D:\\gitRepos\\AgentGeek\\test\\test_agent.py', reloading
+[2026-03-02 01:06:55] INFO [werkzeug]  * Detected change in 'D:\\gitRepos\\AgentGeek\\test\\test_agent.py', reloading
+[2026-03-02 01:06:55] INFO [__main__] 租房Agent服务启动 host=0.0.0.0 port=5000
+[2026-03-02 01:06:55] WARNING [werkzeug]  * Debugger is active!
+[2026-03-02 01:06:55] INFO [werkzeug]  * Debugger PIN: 366-885-201
+[2026-03-02 01:10:27] INFO [werkzeug]  * Detected change in 'D:\\gitRepos\\AgentGeek\\agent.py', reloading
+[2026-03-02 01:10:27] INFO [werkzeug]  * Detected change in 'D:\\gitRepos\\AgentGeek\\app.py', reloading
+[2026-03-02 01:10:27] INFO [werkzeug]  * Detected change in 'D:\\gitRepos\\AgentGeek\\test\\test_agent.py', reloading
+[2026-03-02 01:10:27] INFO [werkzeug]  * Detected change in 'D:\\gitRepos\\AgentGeek\\test\\test_app.py', reloading
+[2026-03-02 01:10:27] INFO [werkzeug]  * Detected change in 'D:\\gitRepos\\AgentGeek\\app.py', reloading
+[2026-03-02 01:10:27] INFO [werkzeug]  * Detected change in 'D:\\gitRepos\\AgentGeek\\agent.py', reloading
+[2026-03-02 01:10:27] INFO [werkzeug]  * Detected change in 'D:\\gitRepos\\AgentGeek\\test\\test_agent.py', reloading
+[2026-03-02 01:10:27] INFO [werkzeug]  * Detected change in 'D:\\gitRepos\\AgentGeek\\test\\test_app.py', reloading
+[2026-03-02 01:10:27] INFO [werkzeug]  * Detected change in 'D:\\gitRepos\\AgentGeek\\test\\test_agent.py', reloading
+[2026-03-02 01:10:27] INFO [werkzeug]  * Detected change in 'D:\\gitRepos\\AgentGeek\\test\\test_app.py', reloading
+[2026-03-02 01:10:27] INFO [__main__] 租房Agent服务启动 host=0.0.0.0 port=5000
+[2026-03-02 01:10:27] WARNING [werkzeug]  * Debugger is active!
+[2026-03-02 01:10:27] INFO [werkzeug]  * Debugger PIN: 366-885-201
+[2026-03-02 01:13:36] INFO [werkzeug]  * Detected change in 'D:\\gitRepos\\AgentGeek\\agent.py', reloading
+[2026-03-02 01:13:36] INFO [werkzeug]  * Detected change in 'D:\\gitRepos\\AgentGeek\\app.py', reloading
+[2026-03-02 01:13:36] INFO [werkzeug]  * Detected change in 'D:\\gitRepos\\AgentGeek\\app.py', reloading
+[2026-03-02 01:13:36] INFO [werkzeug]  * Detected change in 'D:\\gitRepos\\AgentGeek\\agent.py', reloading
+[2026-03-02 01:13:36] INFO [werkzeug]  * Detected change in 'D:\\gitRepos\\AgentGeek\\app.py', reloading
+[2026-03-02 01:13:36] INFO [werkzeug]  * Detected change in 'D:\\gitRepos\\AgentGeek\\test\\test_app.py', reloading
+[2026-03-02 01:13:36] INFO [werkzeug]  * Detected change in 'D:\\gitRepos\\AgentGeek\\test\\test_agent.py', reloading
+[2026-03-02 01:13:36] INFO [werkzeug]  * Detected change in 'D:\\gitRepos\\AgentGeek\\test\\test_agent.py', reloading
+[2026-03-02 01:13:36] INFO [werkzeug]  * Detected change in 'D:\\gitRepos\\AgentGeek\\test\\test_app.py', reloading
+[2026-03-02 01:13:36] INFO [werkzeug]  * Detected change in 'D:\\gitRepos\\AgentGeek\\test\\test_agent.py', reloading
+[2026-03-02 01:13:38] INFO [__main__] 租房Agent服务启动 host=0.0.0.0 port=5000
+[2026-03-02 01:13:38] WARNING [werkzeug]  * Debugger is active!
+[2026-03-02 01:13:38] INFO [werkzeug]  * Debugger PIN: 366-885-201
+[2026-03-02 01:16:05] INFO [werkzeug]  * Detected change in 'D:\\gitRepos\\AgentGeek\\app.py', reloading
+[2026-03-02 01:16:05] INFO [werkzeug]  * Detected change in 'D:\\gitRepos\\AgentGeek\\test\\test_app.py', reloading
+[2026-03-02 01:16:05] INFO [werkzeug]  * Detected change in 'D:\\gitRepos\\AgentGeek\\test\\test_app.py', reloading
+[2026-03-02 01:16:05] INFO [werkzeug]  * Detected change in 'D:\\gitRepos\\AgentGeek\\app.py', reloading
+[2026-03-02 01:16:05] INFO [werkzeug]  * Detected change in 'D:\\gitRepos\\AgentGeek\\agent.py', reloading
+[2026-03-02 01:16:05] INFO [werkzeug]  * Detected change in 'D:\\gitRepos\\AgentGeek\\agent.py', reloading
+[2026-03-02 01:16:06] INFO [__main__] 租房Agent服务启动 host=0.0.0.0 port=5000
+[2026-03-02 01:16:06] WARNING [werkzeug]  * Debugger is active!
+[2026-03-02 01:16:06] INFO [werkzeug]  * Debugger PIN: 366-885-201
